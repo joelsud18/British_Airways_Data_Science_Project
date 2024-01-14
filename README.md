@@ -30,6 +30,7 @@ Some of the visuals produced from the analysis and modeling are as shown:
 ![Confusion Plot](visuals/confusion_plot1.png)
 
 **Feature Importances**
+
 ![Feature Importances](visuals/feature_importances_plot.png)
 
 **Cross-Validation Accuracy Evaluation**
