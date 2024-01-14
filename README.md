@@ -21,12 +21,15 @@ A British Airways Python Data Science Project from Forage which uses interactive
 Some of the visuals produced from the analysis and modeling are as shown:
 
 **Word Cloud**
+
 ![Word Cloud](visuals/wordcloud_image.png)
 
 **Sentiment Analysis**
+
 ![Sentiment Analysis](visuals/sentiment_analysis.png)
 
 **Confusion Plot**
+
 ![Confusion Plot](visuals/confusion_plot1.png)
 
 **Feature Importances**
@@ -34,6 +37,7 @@ Some of the visuals produced from the analysis and modeling are as shown:
 ![Feature Importances](visuals/feature_importances_plot.png)
 
 **Cross-Validation Accuracy Evaluation**
+
 ![Cross Validation Box Plot](visuals/box_plot.png)
 
 ## Installation Instructions:
