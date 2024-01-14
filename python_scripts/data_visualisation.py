@@ -3,6 +3,8 @@ import pandas as pd
 import pyLDAvis
 import pyLDAvis.gensim
 import seaborn as sns
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import confusion_matrix
 from wordcloud import WordCloud
 
 
@@ -127,3 +129,70 @@ class DataVisualisation:
         plt.savefig('visuals/sentiment_analysis.png') # Saving the visual as a .png.
 
         return plt.show() 
+    
+    def confusion_matrix(self, y_test, y_predicted, version_number: int = None):
+
+        '''
+        This method returns a confusion matrix comparing the model predicted values to the true values in the data set.
+
+        Parameters:
+            y_test: The true output data.
+            y_predicted: The model predicted output data.
+        '''
+
+        matrix = confusion_matrix(y_test, y_predicted) # Generate confusion matrix.
+        plt.figure(figsize=(10,7))
+        sns.heatmap(matrix, annot=True, fmt='g', cmap='seismic') # Map confusion matrix onto heatmap.
+        plt.xlabel('Predicted')
+        plt.ylabel('Truth')
+        if version_number == None:
+            plt.savefig('visuals/confusion_plot.png') # Save the visual.
+        else:
+            plt.savefig(f'visuals/confusion_plot{version_number}.png') # Save the visual.
+        return plt.show()
+    
+    def feature_importance(self, DataFrame: pd.DataFrame, feature_importance, target_column_name: str):
+
+        '''
+        Visualise feature importances using a horizontal bar plot.
+
+        Parameters:
+            DataFrame (pd.DataFrame): The input DataFrame containing the features and target column.
+            feature_importance: The array or list of feature importances corresponding to each feature.
+            target_column_name (str): The name of the target column in the DataFrame.
+        '''
+        
+        # Create a series object of the feature importances and feature names:
+        feat_importances = pd.Series(feature_importance, index=DataFrame.drop([target_column_name], axis='columns').columns)
+        # Get all the features in order:
+        top_features = feat_importances.nlargest(len(DataFrame.drop([target_column_name], axis='columns').columns))
+
+        # Create the bar plot:
+        top_features.plot(kind='barh', colormap='brg')
+
+        # Set plot title and axis labels if needed:
+        plt.title('Feature Importances')
+        plt.xlabel('Importance')
+        plt.ylabel('Features')
+
+        # Save the plot as a PNG file:
+        plt.savefig('visuals/feature_importances_plot.png')
+        return plt.show()
+    
+    def box_plot(self, data, title: str, x_label: str):
+        
+        '''
+        Generate and display a box plot for the given data.
+
+        Parameters:
+            data (array-like): The data to be visualized in the box plot.
+            title (str): The title for the box plot.
+            x_label (str): The label for the x-axis.
+            version_number (int): The version of the plot being saved.
+        '''
+
+        sns.boxplot(x=data, color='red') # Creating the box-plot.
+        plt.title(title) # Setting the title.
+        plt.xlabel(x_label) # Setting the x_label.
+        plt.savefig('visuals/box_plot.png') # Save the visual.
+        return plt.show()

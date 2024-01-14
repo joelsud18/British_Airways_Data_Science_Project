@@ -8,6 +8,10 @@ from nltk.corpus import stopwords
 from nltk.sentiment import SentimentIntensityAnalyzer
 import numpy as np
 import pandas as pd
+import pycountry_convert as pc
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.model_selection import train_test_split
+
 
 class DataCleaning:
 
@@ -49,6 +53,10 @@ class DataCleaning:
         return DataFrame
 
 class DataAnalysis:
+
+    '''
+    This class is used to apply transformations required for analysis of data in a dataframe.
+    '''
 
     def tokenise_data(self, DataFrame: pd.DataFrame, column_name: str, ):
 
@@ -293,3 +301,101 @@ class DataAnalysis:
                 return 'Very Positive'
         
         DataFrame['specific sentiment'] = DataFrame['compound score'].apply(specific_sentiment_thresholds) # Assign specific sentiment based on sentiment score to new column.
+
+class DataProcessing:
+
+    '''
+    This class is used to apply ethods to process the data for predictive modelling.
+    '''
+
+    def map_weekdays(self, DataFrame: pd.DataFrame, column_name: str):
+
+        '''
+        This method is used to map string weekdays to integer codes.
+
+        Parameters:
+            DataFrame (pd.DataFrame): The dataframe which contains the column with weekdays.
+            column_name (str): The name of the column which contains weekdays.
+
+        Returns:
+            pd.DataFrame: The updated dataframe.
+        '''
+
+        mapping = {
+        "Mon": 1,
+        "Tue": 2,
+        "Wed": 3,
+        "Thu": 4,
+        "Fri": 5,
+        "Sat": 6,
+        "Sun": 7,
+        }
+
+        DataFrame[column_name] = DataFrame[column_name].map(mapping)
+        return DataFrame
+    
+    def encode_object_columns(self, DataFrame: pd.DataFrame):
+
+        '''
+        This method takes a dataframe and converts all object columns into category codes, to encode string data into numerical format.
+
+        Parameters:
+            DataFrame (pd.DataFrame): The dataframe to which this method will be applied.
+
+        Returns: 
+            pd.DataFrame: The updated encoded dataframe.
+
+        '''
+        
+        object_columns = DataFrame.select_dtypes(include=['object']).columns.tolist() # Adds all columns with 'object' as their data type into a list.
+        DataFrame[object_columns] = DataFrame[object_columns].astype('category') # Changes the data type of the columns in this list to 'category'.
+        DataFrame[object_columns] = DataFrame[object_columns].apply(lambda x: x.cat.codes) # Converts these categories into numerical codes.
+        return DataFrame
+    
+    def country_to_continent_column(self, DataFrame: pd.DataFrame, country_column_name: str):
+
+        '''
+        Add a new column to the DataFrame with continent information based on the given country column.
+
+        Parameters:
+            DataFrame (pd.DataFrame): The pandas DataFrame containing the data.
+            country_column_name (str): The name of the column in DataFrame containing country names.
+
+        Returns:
+            pd.DataFrame: A DataFrame with an additional column representing the continent of each country.
+
+        Notes:
+            This method relies on the pycountry_convert library to map country names to continents.
+            Some special cases are handled explicitly (e.g., 'Myanmar (Burma)', 'Timor-Leste', 'Svalbard & Jan Mayen').
+            If a country is not recognized or an error occurs during the mapping process, the original country name is retained.
+        '''
+
+        def country_to_continent(country_name):
+
+            '''
+            Map a country name to its continent.
+
+            Parameters:
+                country_name (str): The name of the country.
+
+            Returns:
+                str or None: The continent name or None if the country is not recognized or an error occurs.
+            '''
+
+            try:
+                if country_name == 'Myanmar (Burma)' or country_name == 'Timor-Leste':
+                    return 'Asia'
+                elif country_name == 'Svalbard & Jan Mayen':
+                    return 'Europe'
+                else:
+                    country_alpha2 = pc.country_name_to_country_alpha2(country_name)
+                    if country_alpha2 is None:
+                        return None  # Country not recognized, you can choose to handle it as needed
+                    country_continent_code = pc.country_alpha2_to_continent_code(country_alpha2)
+                    country_continent_name = pc.convert_continent_code_to_continent_name(country_continent_code)
+                    return country_continent_name
+            except Exception as e:
+                return country_name
+
+        DataFrame[f"{country_column_name}_continent"] = DataFrame[country_column_name].apply(lambda x: country_to_continent(x))
+        return DataFrame
